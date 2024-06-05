@@ -1,0 +1,4 @@
+config.env
+backend/node_modules
+frontend/node_modules
+irsa-task.pem
