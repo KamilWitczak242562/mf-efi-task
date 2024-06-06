@@ -80,14 +80,80 @@ docker compose -f docker-compose.yaml up
 - Backend service will be available at `http://localhost:9000/api/weather`.
 - Frontend service will be available at `http://localhost:8000`.
 
+## Cloud Hosting on Azure
+
+### Step 1: Set Up an Azure Virtual Machine
+
+1. **Create a Virtual Machine**:
+   - Go to the [Azure Portal](https://portal.azure.com/).
+   - Navigate to "Create a resource" > "Compute" > "Virtual Machine".
+   - Configure the VM (e.g., Ubuntu Server) and ensure it has a public IP.
+
+2. **Open Ports**:
+   - Go to "Networking" and add inbound port rules for ports 80, 8000, and 9000 to allow HTTP traffic.
+
+### Step 2: Install Docker and Docker Compose on the VM
+
+1. **SSH into your VM**:
+   ```sh
+   ssh -i /path/to/your/private/key azureuser@your_vm_public_ip
+   ```
+
+2. **Install Docker and Docker Compose**:
+   ```sh
+   sudo apt-get update
+   sudo apt-get install -y docker.io
+   sudo systemctl start docker
+   sudo systemctl enable docker
+   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   sudo chmod +x /usr/local/bin/docker-compose
+   ```
+
+### Step 3: Deploy the Application
+
+1. **Clone the Repository and Create Configuration File**:
+   ```sh
+   git clone https://github.com/KamilWitczak242562/mf-efi-task.git
+   cd mf-efi-task
+   echo "APPID=YOUR_API_KEY" > config.env
+   ```
+
+2. **Run Docker Compose**:
+   ```sh
+   sudo docker-compose up -d
+   ```
+
+### Step 4: Set Up Azure Application Gateway
+
+1. **Create an Application Gateway** in the Azure Portal.
+2. **Configure Backend Pools** to include your virtual machine.
+3. **Create Listeners** for HTTP traffic.
+4. **Configure Routing Rules** to route traffic to the appropriate backend pools.
+
+### Step 5: Enable External SSH Access and Add Public Key
+
+1. **Add SSH Public Key** to the VM's authorized keys file:
+   - On your local machine, copy the contents of `id_rsa_internship.pub`.
+   - On the VM, open the authorized keys file:
+     ```sh
+     nano ~/.ssh/authorized_keys
+     ```
+   - Paste the contents of `id_rsa_internship.pub` into this file and save it.
+
+2. **Set Permissions**:
+   ```sh
+   chmod 700 ~/.ssh
+   chmod 600 ~/.ssh/authorized_keys
+   ```
+
+3. **Ensure the SSH Port is Open** in the VM's networking settings.
+
+### Access the Application
+The application is deployed on Azure and accessible at http://20.215.97.163/.
+
+
 
 ## TODO
-
-### Cloud hosting
-
-* Set up the weather service in a free cloud hosting service, e.g. [Azure](https://azure.microsoft.com/en-us/free/), [AWS](https://aws.amazon.com/free/) or [Google Cloud](https://cloud.google.com/free/).
-* Enable external access to weather app via HTTP reverse proxy. We suggest creating one compute instance e.g. for AWS one EC2 instance, that will host both weather app and before mentioned proxy. Remember that Weather App should be exposed in a secure way.
-* Enable external SSH access and add id_rsa_internship.pub key, which you can find in this repository. We would like to check your work so grant us admin rights on your test system.
 
 ### Ansible
 
